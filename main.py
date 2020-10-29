@@ -3,6 +3,8 @@ import re
 import sys
 from datetime import datetime
 import time
+import os
+from pathlib import Path
 
 
 def login(username, password, session):
@@ -41,6 +43,19 @@ def get_course_name(course_page_url, session):
         return course_name_search[0]
 
 
+def store_number_of_assigments(number_of_assigments, filePath):
+    with open(filePath, 'w') as file:
+        file.write(str(number_of_assigments))
+
+
+def get_number_of_assigments(filePath):
+    with open(filePath, 'r') as file:
+        try:
+            return int(file.read())
+        except:
+            return 0
+
+
 def main(args):
     if len(args) < 2:
         sys.exit("Nie podano argumentów: username password course_id interval?")
@@ -48,9 +63,12 @@ def main(args):
     username = args[0]
     password = args[1]
     course_id = args[2]
-    checking_interval_sec = 5*60
+    checking_interval_sec = 2
 
-    if len(args) > 3 != None:
+    file_path = os.path.join(os.path.expanduser(
+        '~'), 'Documents', 'moodle-notifier', 'course-{}.txt'.format(course_id))
+
+    if len(args) > 3:
         checking_interval_sec = args[3]
 
     course_page_url = "https://moodle.math.uni.opole.pl/course/view.php?id={}".format(
@@ -68,10 +86,9 @@ def main(args):
 
     init_search_results = search_for_assigments(course_page_url, session)
 
-    current_number_of_assigments = len(init_search_results)
-    print('')
-    print('Obecna ilość zadań: {}'.format(current_number_of_assigments))
-    [print(assigment) for assigment in init_search_results]
+    Path(file_path).parent.mkdir(parents=True, exist_ok=True)
+
+    current_number_of_assigments = get_number_of_assigments(file_path)
 
     while True:
         time.sleep(checking_interval_sec)
@@ -89,9 +106,11 @@ def main(args):
 
         number_of_assigments = len(assigment_search_result)
 
-        if number_of_assigments > current_number_of_assigments:
-            print('Nowe zadanie - {}'.format(current_date))
-            [print(assigment) for assigment in number_of_assigments]
+        if number_of_assigments != current_number_of_assigments:
+            print('Ilość zadań uległa zmianie - {}'.format(current_date))
+            [print(assigment) for assigment in assigment_search_result]
+            store_number_of_assigments(number_of_assigments, file_path)
+            current_number_of_assigments = number_of_assigments
         else:
             print('Brak nowych zadań - {}'.format(current_date))
 
