@@ -110,7 +110,7 @@ def main(args):
     username = args[0]
     password = args[1]
     course_id = args[2]
-    checking_interval_sec = 5
+    checking_interval_sec = 60*60
 
     file_path = os.path.join(os.path.expanduser(
         '~'), 'Documents', 'moodle-notifier', 'course-{}.txt'.format(course_id))
