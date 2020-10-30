@@ -4,6 +4,7 @@ import sys
 from datetime import datetime
 import time
 import os
+import getpass
 from pathlib import Path
 
 
@@ -105,18 +106,19 @@ def get_arr_diff(arr1, arr2):
 
 def main(args):
     if len(args) < 2:
-        sys.exit("Nie podano argumentów: username password course_id interval?")
+        sys.exit("Nie podano argumentów: username course_id interval?")
 
     username = args[0]
-    password = args[1]
-    course_id = args[2]
-    checking_interval_sec = 60*60
+    course_id = args[1]
+    checking_interval_sec = 5*60
+
+    password = getpass.getpass("Podaj hasło do konta moodle: ")
 
     file_path = os.path.join(os.path.expanduser(
         '~'), 'Documents', 'moodle-notifier', 'course-{}.txt'.format(course_id))
 
-    if len(args) > 3:
-        checking_interval_sec = args[3]
+    if len(args) > 2:
+        checking_interval_sec = args[2]
 
     course_page_url = "https://moodle.math.uni.opole.pl/course/view.php?id={}".format(
         course_id)
