@@ -5,7 +5,14 @@ from datetime import datetime
 import time
 import os
 import getpass
+import smtplib
+import platform
 from pathlib import Path
+
+
+def show_notification(body, title):
+    if print(platform.system()) == 'Linux':
+        os.system("notify-send -u critical '{}' '{}'".format(title, body))
 
 
 class Assigment:
@@ -14,8 +21,14 @@ class Assigment:
         self.name = name
         self.link = link
 
-    def __str__(self):
+    def print_short(self):
+        return '{} {}'.format(self.id, self.name)
+
+    def print(self):
         return '{} {} {}'.format(self.id, self.name, self.link)
+
+    def __str__(self):
+        return self.print(self)
 
 
 def login(username, password, session):
@@ -133,6 +146,8 @@ def main(args):
 
     current_assigments_ids = get_assigments_id(file_path)
 
+    course_name = get_course_name(course_page_url, session)
+
     while True:
         print('')
 
@@ -148,8 +163,13 @@ def main(args):
         assigments_ids = get_ids_of_assigment(assigments)
 
         if len(get_arr_diff(assigments_ids, current_assigments_ids)) != 0:
-            print('Ilość zadań uległa zmianie - {}'.format(current_date))
-            [print(assigment) for assigment in assigments]
+            body = '\n'.join([assigment.print_short()
+                              for assigment in assigments])
+            show_notification(body, course_name)
+            print(
+                'Ilość zadań uległa zmianie, lista zadań na {} ->'.format(current_date))
+            print('\n'.join([assigment.print()
+                             for assigment in assigments]))
             store_assigments_id(assigments_ids, file_path)
             current_assigments_ids = assigments_ids
         else:
