@@ -5,6 +5,6 @@
 
 ### Sposób użycia
 
-`main.py username password course_id interval_in_seconds`
+`main.py username course_id interval_in_seconds`
 
 **interval_in_seconds jest opcjonalny**
